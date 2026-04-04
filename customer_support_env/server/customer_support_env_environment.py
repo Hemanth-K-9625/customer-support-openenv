@@ -49,6 +49,7 @@ class CustomerSupportEnvironment(Environment):
         """Initialize the customer_support_env environment."""
         self._state = State(episode_id=str(uuid4()), step_count=0)
         self._reset_count = 0
+        self._current_obs = None
 
     def reset(self) -> CustomerSupportObservation:
         """
@@ -59,13 +60,14 @@ class CustomerSupportEnvironment(Environment):
         """
         self._state = State(episode_id=str(uuid4()), step_count=0)
         self._reset_count += 1
-
-        return CustomerSupportObservation(
-            echoed_message="Customer Support Env environment ready!",
-            message_length=0,
-            done=False,
-            reward=0.0,
+        self._current_obs = CustomerSupportObservation(
+            user_query="My order has not arrived yet",
+            sentiment="frustrated",
+            issue_type="delayed_order",
+            order_status="shipped",
+            attempts=0
         )
+        return self._current_obs
 
     def step(self, action: CustomerSupportAction) -> CustomerSupportObservation:  # type: ignore[override]
         """
