@@ -1,0 +1,19 @@
+# Virtual environments (your case)
+venv/
+env/
+
+# Python cache (both root + inside subfolder)
+__pycache__/
+*.pyc
+
+# OS files (Mac)
+.DS_Store
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# Optional: VS Code settings
+.vscode/
