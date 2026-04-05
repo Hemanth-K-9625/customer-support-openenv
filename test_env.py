@@ -1,40 +1,26 @@
 from customer_support_env.server.customer_support_env_environment import CustomerSupportEnvironment
-from customer_support_env.models import CustomerSupportAction
 
 env = CustomerSupportEnvironment()
 
-obs = env.reset()
+print("---- EASY TASK ----")
+obs = env.reset(task="easy")
+print(obs)
 
-print("User Query: ", obs.user_query)
-print("Sentiment: ", obs.sentiment)
-print("Issue Type: ", obs.issue_type)
-print("Order Status: ", obs.order_status)
-print("Attempts: ", obs.attempts)
+obs, reward, done, _ = env.step("refund")
+print("Reward:", reward, "Done:", done)
 
-current_state = env.state
 
-print("Episode ID: ", current_state.episode_id)
-print("Step Count: ", current_state.step_count)
+print("\n---- MEDIUM TASK ----")
+obs = env.reset(task="medium")
+print(obs)
 
-# -------- YOUR PART TEST --------
+obs, reward, done, _ = env.step("apologize")
+print("Reward:", reward, "Done:", done)
 
-print("\n--- Testing Step Function ---")
 
-actions = ["apologize", "track_order", "refund"]
+print("\n---- HARD TASK ----")
+obs = env.reset(task="hard")
+print(obs)
 
-for action in actions:
-    print(f"\nAction: {action}")
-
-    obs = env.step(CustomerSupportAction(action=action))
-
-    print("User Query:", obs.user_query)
-    print("Sentiment:", obs.sentiment)
-    print("Issue Type:", obs.issue_type)
-    print("Order Status:", obs.order_status)
-    print("Attempts:", obs.attempts)
-    print("Reward:", obs.reward)
-    print("Done:", obs.done)
-
-    if obs.done:
-        print("\nEpisode Finished")
-        break
+obs, reward, done, _ = env.step("apologize")
+print("Reward:", reward, "Done:", done)
