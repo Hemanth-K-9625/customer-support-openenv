@@ -16,12 +16,16 @@ from uuid import uuid4
 from openenv.core.env_server.interfaces import Environment
 from openenv.core.env_server.types import State
 
+from env import reward
+
 try:
     from ..models import CustomerSupportAction, CustomerSupportObservation
 except ImportError:
     from models import CustomerSupportAction, CustomerSupportObservation
 
 from customer_support_env.task_env.tasks import easy_task, hard_task, medium_task
+
+MAX_STEPS = 10
 
 class CustomerSupportEnvironment(Environment):
     """
@@ -124,15 +128,49 @@ class CustomerSupportEnvironment(Environment):
         if base_score == 1.0:
             reward += 0.5
 
-        done = base_score == 1.0
-
         updated_sentiment = self._current_obs.sentiment
         updated_order_status = self._current_obs.order_status
 
         if action_name == "apologize":
-            updated_sentiment = "calmer"
-        elif action_name in {"refund", "offer_refund"} and reward > 0.0:
+            if updated_sentiment == "angry":
+                updated_sentiment = "frustrated"
+            elif updated_sentiment == "frustrated":
+                updated_sentiment = "calmer"
+            else:
+                updated_sentiment = "neutral"
+        elif action_name == "provide_status_update":
+            if updated_sentiment == "frustrated":
+                updated_sentiment = "calmer"
+        elif action_name == "give_discount":
+            if updated_sentiment in {"calmer", "neutral"}:
+                updated_sentiment = "satisfied"
+
+        if action_name in {"refund", "offer_refund"} and reward > 0.0:
             updated_order_status = "refunded"
+        elif action_name == "provide_status_update":
+            updated_order_status = "update_provided"
+        elif action_name == "escalate_to_human":
+            updated_order_status = "escalated"
+        elif action_name == "give_discount":
+            updated_order_status = "discount_applied"
+
+        # ---- STEP 3: Done Conditions ----
+        task_completed = base_score == 1.0
+        max_steps_reached = self._state.step_count >= MAX_STEPS
+        recent_actions = self.action_history[-3:]
+        repeated_wrong = (
+            len(recent_actions) == 3
+            and len(set(recent_actions)) == 1
+            and base_score == 0.0
+        )
+        done = task_completed or max_steps_reached or repeated_wrong
+
+        termination_reason = (
+            "task_completed" if task_completed
+            else "max_steps_reached" if max_steps_reached
+            else "repeated_wrong_actions" if repeated_wrong
+            else "in_progress"
+        )
 
         self._current_obs = CustomerSupportObservation(
             user_query=self._current_obs.user_query,
@@ -148,9 +186,12 @@ class CustomerSupportEnvironment(Environment):
             "actions_taken": list(self.action_history),
             "task_score": base_score,
             "repeated_action": repeated_action,
+            "termination_reason": termination_reason,
+            "steps_taken": self._state.step_count,
         }
 
         return self._current_obs, reward, done, info
+    
     @property
     def state(self) -> State:
         """
