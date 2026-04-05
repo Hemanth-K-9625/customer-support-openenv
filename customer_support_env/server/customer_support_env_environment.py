@@ -75,6 +75,8 @@ class CustomerSupportEnvironment(Environment):
             raise ValueError(f"Unknown task: {task}. Choose easy, medium or hard.")
         self._current_obs = CustomerSupportObservation(
             **self._current_task.initial_state
+            reward=0.0,
+            done=False
         )
         return self._current_obs
 
