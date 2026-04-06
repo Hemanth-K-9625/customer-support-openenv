@@ -1,40 +1,116 @@
 from customer_support_env.server.customer_support_env_environment import CustomerSupportEnvironment
-from customer_support_env.models import CustomerSupportAction
 
 env = CustomerSupportEnvironment()
 
-obs = env.reset()
 
-print("User Query: ", obs.user_query)
-print("Sentiment: ", obs.sentiment)
-print("Issue Type: ", obs.issue_type)
-print("Order Status: ", obs.order_status)
-print("Attempts: ", obs.attempts)
+# ----------------------------
+# 🔹 EASY TASK TEST
+# ----------------------------
+print("---- EASY TASK ----")
+obs = env.reset(task="easy")
+print("Initial:", obs)
 
-current_state = env.state
+obs, reward, done, info = env.step("refund")
+print("Action: refund | Reward:", reward, "| Done:", done)
+print("Info:", info)
 
-print("Episode ID: ", current_state.episode_id)
-print("Step Count: ", current_state.step_count)
 
-# -------- YOUR PART TEST --------
+# ----------------------------
+# 🔹 MEDIUM TASK TEST
+# ----------------------------
+print("\n---- MEDIUM TASK ----")
+obs = env.reset(task="medium")
+print("Initial:", obs)
 
-print("\n--- Testing Step Function ---")
-
-actions = ["apologize", "track_order", "refund"]
+actions = ["apologize", "apologize", "track_order", "refund"]
 
 for action in actions:
-    print(f"\nAction: {action}")
+    obs, reward, done, info = env.step(action)
+    print(f"Action: {action} | Reward: {reward} | Done: {done}")
+    print("State:", obs)
 
-    obs = env.step(CustomerSupportAction(action=action))
+    if done:
+        print("Episode ended:", info.get("termination_reason"))
+        break
 
-    print("User Query:", obs.user_query)
-    print("Sentiment:", obs.sentiment)
-    print("Issue Type:", obs.issue_type)
-    print("Order Status:", obs.order_status)
-    print("Attempts:", obs.attempts)
-    print("Reward:", obs.reward)
-    print("Done:", obs.done)
 
-    if obs.done:
-        print("\nEpisode Finished")
+# ----------------------------
+# ❌ INVALID ACTION TEST
+# ----------------------------
+print("\n---- INVALID ACTION TEST ----")
+env.reset(task="medium")
+
+obs, reward, done, info = env.step("random_action")
+
+print("Action: random_action")
+print("Reward:", reward)   # should be -0.2
+print("Done:", done)
+print("Info:", info)
+
+
+# ----------------------------
+# 🔁 REPEATED ACTION TEST
+# ----------------------------
+print("\n---- REPEATED ACTION TEST ----")
+env.reset(task="medium")
+
+actions = ["apologize", "apologize", "apologize"]
+
+for action in actions:
+    obs, reward, done, info = env.step(action)
+    print(f"Action: {action} | Reward: {reward}")
+
+
+# ----------------------------
+# 🌀 NO PROGRESS TEST
+# ----------------------------
+print("\n---- NO PROGRESS TEST ----")
+env.reset(task="medium")
+
+actions = ["ask_info", "ask_info", "ask_info"]
+
+for action in actions:
+    obs, reward, done, info = env.step(action)
+    print(f"Action: {action} | Reward: {reward}")
+
+
+# ----------------------------
+# 🔁 LOOP TEST (A → B → A → B)
+# ----------------------------
+print("\n---- LOOP TEST ----")
+env.reset(task="medium")
+
+actions = ["apologize", "provide_status_update"] * 3
+
+for action in actions:
+    obs, reward, done, info = env.step(action)
+    print(f"Action: {action} | Reward: {reward}")
+
+
+# ----------------------------
+# 🏁 COMPLETION TEST
+# ----------------------------
+print("\n---- COMPLETION TEST ----")
+env.reset(task="easy")
+
+actions = ["refund"]
+
+for action in actions:
+    obs, reward, done, info = env.step(action)
+    print(f"Action: {action} | Reward: {reward} | Done: {done}")
+    print("Termination:", info.get("termination_reason"))
+
+
+# ----------------------------
+# ⛔ STRESS TEST (MAX STEPS)
+# ----------------------------
+print("\n---- STRESS TEST ----")
+env.reset(task="hard")
+
+for i in range(15):  # more than MAX_STEPS
+    obs, reward, done, info = env.step("ask_info")
+    print(f"Step {i} | Reward: {reward} | Done: {done}")
+
+    if done:
+        print("Stopped due to:", info.get("termination_reason"))
         break

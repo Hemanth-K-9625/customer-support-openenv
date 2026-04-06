@@ -18,3 +18,26 @@ print("Partial only:", medium_task.evaluate(["apologize"]))
 print("Optional only:", medium_task.evaluate(["give_discount"]))
 print("No actions:", medium_task.evaluate([]))
 print("Wrong actions:", medium_task.evaluate(["track_order"]))
+
+# ---------------- HARD TASK TEST (YOUR PART) ----------------
+from customer_support_env.task_env.tasks import hard_task
+
+print("\nHard Task Grader")
+
+print("Perfect flow:",
+      hard_task.evaluate(["apologize", "acknowledge_issues", "offer_refund", "close_case"]))
+
+print("Without closing:",
+      hard_task.evaluate(["apologize", "acknowledge_issues", "offer_refund"]))
+
+print("Partial (no resolution):",
+      hard_task.evaluate(["apologize", "acknowledge_issues"]))
+
+print("Only apology:",
+      hard_task.evaluate(["apologize"]))
+
+print("Wrong actions:",
+      hard_task.evaluate(["track_order"]))
+
+print("No actions:",
+      hard_task.evaluate([]))
