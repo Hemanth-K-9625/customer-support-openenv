@@ -54,21 +54,21 @@ print("After update - sentiment: ", obs.sentiment, "| order_status: ", obs.order
 
 obs, reward, done, info = env.step("give_discount")
 print("After discount - sentiment: ", obs.sentiment, "| order_status: ", obs.order_status)
-print("Done: ", done, "| Reason: ", info["termination_reason"])
+print("Done: ", done, "| Reason: ", info.get("termination_reason", "unknown"))
 
 print("\nTesting Max Steps")
 obs = env.reset(task="easy")
 for i in range(12):
     obs, reward, done, info = env.step("apologize")
     if done:
-        print(f"Episode ended at step {i+1} | Reason: {info['termination_reason']}")
+        print(f"Episode ended at step {i+1} | Reason: {info.get('termination_reason', 'unknown')}")
         break
 
 print("\nTesting Repeated Wrong Actions")
 obs = env.reset(task="easy")
 for i in range(5):
     obs, reward, done, info = env.step("track_order")
-    print(f"Step {i+1} | done: {done} | reason: {info['termination_reason']} | history: {info['actions_taken']}")
+    print(f"Step {i+1} | done: {done} | reason: {info.get('termination_reason', 'unknown')} | history: {info['actions_taken']}")
     if done:
-        print(f"Episode ended at step {i+1} | Reason: {info['termination_reason']}")
+        print(f"Episode ended at step {i+1} | Reason: {info.get('termination_reason', 'unknown')}")
         break
