@@ -60,7 +60,6 @@ No explanation. No sentence. Just one word."""
     max_tokens=10,
 )
     raw_output = response.choices[0].message.content.strip().lower()
-    print(f"LLM raw output: {raw_output}")  # debug
     return parse_action(raw_output)
 
 
@@ -87,26 +86,41 @@ def parse_action(raw_output: str) -> str:
     return "apologize"
 
 env = CustomerSupportEnvironment()
-obs = env.reset(task="medium")
-total_reward = 0.0
-reward_history = []
+task = "medium"
 
-for step in range(10):
-    
+# -----------------------------
+# 🔹 START LOG (STRICT)
+# -----------------------------
+print(f"[START] task={task} env=CustomerSupportEnvironment model={MODEL_NAME}")
+
+obs = env.reset(task=task)
+
+total_reward = 0.0
+step = 0
+done = False
+
+# -----------------------------
+# 🔹 LOOP
+# -----------------------------
+while not done and step < 10:
+    step += 1
+
     action = get_action_from_llm(obs, env.action_history)
 
     obs, reward, done, info = env.step(action)
+
     total_reward += reward
-    reward_history.append(reward)
-    print(f"Step {step + 1} | action={action} | reward={reward} | done={done}")
 
-    if done:
-        break
+    # -----------------------------
+    # 🔹 STEP LOG (STRICT)
+    # -----------------------------
+    print(
+        f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()}"
+    )
 
-total_reward = sum(reward_history)
-normalized_score = max(0.0, min(1.0, total_reward / 10))
-
-print(f"Total reward: {total_reward}")
-print(f"Reward history: {reward_history}")
-print(f"Normalized Score: {normalized_score}")
-print("Episode finished")
+# -----------------------------
+# 🔹 END LOG (STRICT)
+# -----------------------------
+print(
+    f"[END] success={str(done).lower()} steps={step} rewards={total_reward:.2f}"
+)
