@@ -88,21 +88,21 @@ class MediumDelayedOrderTask(CustomerSupportTask):
         )
     
     def evaluate(self, actions_taken: list) -> float:
-        required_actions = ["apologize", "provide_status_update"]
+        required_actions = ["apologize", "track_order"]
         has_all_required_actions = all(
             action in actions_taken for action in required_actions
         )
-        has_optional = "give_discount" in actions_taken
+        has_refund = "refund" in actions_taken
         has_any_required_action = any(
             action in actions_taken for action in required_actions
         )
 
-        # Full credit: the agent completed the required support steps and issued a refund.
-        if has_all_required_actions and has_optional:
+        # Full credit: required actions are present and the refund was issued.
+        if has_all_required_actions and has_refund:
             return 1.0
 
-        # Strong partial progress: the agent completed the required support steps.
-        if has_all_required_actions and not has_optional:
+        # Strong partial progress: required actions are present without final resolution.
+        if has_all_required_actions and not has_refund:
             return 0.8
 
         # Partial credit: at least one of the required actions was taken.

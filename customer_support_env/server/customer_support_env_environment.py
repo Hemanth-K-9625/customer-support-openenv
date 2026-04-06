@@ -47,6 +47,7 @@ class CustomerSupportEnvironment(Environment):
     SUPPORTS_CONCURRENT_SESSIONS: bool = True
     VALID_ACTIONS = {
     "apologize",
+    "track_order",
     "provide_status_update",
     "refund",
     "offer_refund",
@@ -140,7 +141,7 @@ class CustomerSupportEnvironment(Environment):
         # -----------------------------
         # 4️⃣ ACTION-LEVEL REWARD
         # -----------------------------
-        if action_name in {"apologize", "provide_status_update", "ask_info"}:
+        if action_name in {"apologize", "track_order", "provide_status_update", "ask_info"}:
             reward += 0.3
 
         elif action_name in {"refund", "offer_refund"}:
@@ -193,7 +194,7 @@ class CustomerSupportEnvironment(Environment):
             else:
                 updated_sentiment = "neutral"
 
-        elif action_name == "provide_status_update":
+        elif action_name in {"track_order", "provide_status_update"}:
             updated_order_status = "update_provided"
             if updated_sentiment == "frustrated":
                 updated_sentiment = "calmer"
