@@ -1,5 +1,6 @@
 import requests
 import os
+from customer_support_env.server.customer_support_env_environment import CustomerSupportEnvironment
 
 API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
 
