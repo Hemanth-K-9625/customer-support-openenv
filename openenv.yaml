@@ -30,3 +30,11 @@ entrypoints:
   reset: "POST /reset"
   step: "POST /step"
   state: "GET /state"
+
+action_space:
+  type: CustomerSupportAction
+
+observation_space:
+  type: CustomerSupportObservation
+
+entry_point: server.customer_support_env_environment:CustomerSupportEnvironment
