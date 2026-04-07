@@ -17,7 +17,7 @@ from openenv.core.env_server.interfaces import Environment
 from openenv.core.env_server.types import State
 
 try:
-    from ..models import CustomerSupportAction, CustomerSupportObservation
+    from ..customer_support_env.models import CustomerSupportAction, CustomerSupportObservation
 except ImportError:
     from models import CustomerSupportAction, CustomerSupportObservation
 

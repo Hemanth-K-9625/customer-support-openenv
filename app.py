@@ -8,7 +8,7 @@ except Exception as e:
 
 try:
     from .customer_support_env.models import CustomerSupportAction, CustomerSupportObservation
-    from .customer_support_env.server.customer_support_env_environment import CustomerSupportEnvironment
+    from .server.customer_support_env_environment import CustomerSupportEnvironment
 except ModuleNotFoundError:
     from models import CustomerSupportAction, CustomerSupportObservation
     from server.customer_support_env_environment import CustomerSupportEnvironment

@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-from customer_support_env.server.customer_support_env_environment import (
+from server.customer_support_env_environment import (
     CustomerSupportEnvironment,
 )
 
