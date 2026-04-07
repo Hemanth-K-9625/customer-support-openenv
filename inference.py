@@ -2,7 +2,7 @@ import requests
 import os
 from customer_support_env.server.customer_support_env_environment import CustomerSupportEnvironment
 
-API_URL = "https://router.huggingface.co/hf-inference/v1"
+API_URL = os.getenv('API_BASE_URL')
 MODEL_NAME=os.getenv('MODEL_NAME')
 headers = {
     "Authorization": f"Bearer {os.getenv('HF_TOKEN')}",
