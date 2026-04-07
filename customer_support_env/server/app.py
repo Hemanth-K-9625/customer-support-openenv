@@ -52,6 +52,18 @@ app = create_app(
     max_concurrent_envs=1,  # increase this number to allow more concurrent WebSocket sessions
 )
 
+@app.get("/")
+def home():
+    return {
+        "message": "Customer Support RL Environment is running",
+        "endpoints": {
+            "reset": "/reset",
+            "step": "/step",
+            "docs": "/docs"
+        }
+    }
+
+
 
 def main(host: str = "0.0.0.0", port: int = 8000):
     """
