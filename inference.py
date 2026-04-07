@@ -15,10 +15,8 @@ import os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url=API_BASE_URL,
-    api_key=os.getenv("HF_TOKEN")
+    api_key=os.getenv("OPENAI_API_KEY")
 )
-
 VALID_ACTIONS = [
     "apologize",
     "refund",
