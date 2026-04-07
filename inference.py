@@ -43,18 +43,30 @@ Answer:
                 "inputs": prompt,
                 "parameters": {"max_new_tokens": 20}
             },
-            timeout=10
+            timeout=15
         )
 
-        data = response.json()
+        if response.status_code != 200:
+            print("HF ERROR:", response.text)
+            return smart_fallback(obs_text)
+
+        try:
+            data = response.json()
+        except:
+            print("Invalid JSON:", response.text)
+            return smart_fallback(obs_text)
+
         print("HF RAW:", data)
+
+        if isinstance(data, dict) and "error" in data:
+            print("HF API ERROR:", data["error"])
+            return smart_fallback(obs_text)
 
         if isinstance(data, list) and "generated_text" in data[0]:
             output = data[0]["generated_text"].lower()
             return map_to_valid_action(output, obs_text)
 
         return smart_fallback(obs_text)
-
     except Exception as e:
         print("LLM Error:", e)
         return smart_fallback(obs_text)
