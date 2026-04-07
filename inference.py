@@ -20,21 +20,75 @@ headers = {
     "Authorization": f"Bearer {os.getenv('HF_TOKEN')}"
 }
 
+import requests
+import os
+
+API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
+
+headers = {
+    "Authorization": f"Bearer {os.getenv('HF_TOKEN')}"
+}
+
+VALID_ACTIONS = ["respond_to_user", "check_order_status", "issue_refund"]
+
+
 def get_action_from_llm(obs, history):
-    prompt = f"{obs}\nHistory: {history}\nWhat action should be taken?"
+    prompt = f"""
+You are a customer support agent.
 
-    response = requests.post(API_URL, headers=headers, json={
-        "inputs": prompt
-    })
+Based on the customer message, choose the BEST action from:
+{VALID_ACTIONS}
 
-    data = response.json()
+Rules:
+- Only return ONE action
+- No explanation
+- Output must be exactly one of the actions
 
-    # Extract generated text safely
+Customer message:
+{obs}
+
+Previous actions:
+{history}
+
+Answer:
+"""
+
     try:
-        return data[0]["generated_text"]
-    except:
-        return "respond_to_user"
+        response = requests.post(API_URL, headers=headers, json={
+            "inputs": prompt,
+            "parameters": {
+                "max_new_tokens": 20
+            }
+        })
 
+        data = response.json()
+
+        # Extract text safely
+        if isinstance(data, list) and "generated_text" in data[0]:
+            output = data[0]["generated_text"].lower()
+
+            # Match valid action
+            for action in VALID_ACTIONS:
+                if action in output:
+                    return action
+
+        # fallback
+        return smart_fallback(obs)
+
+    except Exception as e:
+        print("LLM Error:", e)
+        return smart_fallback(obs)
+
+def smart_fallback(obs):
+    obs = obs.lower()
+
+    if "refund" in obs:
+        return "issue_refund"
+    elif "late" in obs or "delay" in obs:
+        return "check_order_status"
+    else:
+        return "respond_to_user"
+    
 def parse_action(raw_output: str) -> str:
     for action in VALID_ACTIONS:
         if action in raw_output:
