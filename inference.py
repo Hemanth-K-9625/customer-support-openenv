@@ -49,7 +49,7 @@ Reply with ONLY the action name. Nothing else.
 """
 
     response = client.chat.completions.create(
-    model=MODEL_NAME,
+    model="gpt-4.1-mini",
     messages=[
         {
             "role": "system", 
