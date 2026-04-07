@@ -11,7 +11,13 @@ API_BASE_URL = os.getenv("API_BASE_URL")
 MODEL_NAME = os.getenv("MODEL_NAME")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    base_url=API_BASE_URL,
+    api_key=os.getenv("HF_TOKEN")
+)
 
 VALID_ACTIONS = [
     "apologize",
