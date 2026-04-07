@@ -2,7 +2,7 @@ import requests
 import os
 from customer_support_env.server.customer_support_env_environment import CustomerSupportEnvironment
 
-API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
+API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-large"
 MODEL_NAME=os.getenv('MODEL_NAME')
 headers = {
     "Authorization": f"Bearer {os.getenv('HF_TOKEN')}"
@@ -10,18 +10,24 @@ headers = {
 
 VALID_ACTIONS = ["respond_to_user", "check_order_status", "issue_refund"]
 
-
+def extract_text(obs):
+    try:
+        return obs.text.lower()
+    except:
+        return str(obs).lower()
 def get_action_from_llm(obs, history):
+    obs_text = extract_text(obs)
+
     prompt = f"""
 You are a customer support agent.
 
 Choose the BEST action from:
 {VALID_ACTIONS}
 
-ONLY return the action name. No explanation.
+ONLY return the action name.
 
 Customer:
-{obs}
+{obs_text}
 
 History:
 {history}
@@ -41,18 +47,17 @@ Answer:
         )
 
         data = response.json()
-        print("HF RAW:", data)  # DEBUG
+        print("HF RAW:", data)
 
         if isinstance(data, list) and "generated_text" in data[0]:
             output = data[0]["generated_text"].lower()
+            return map_to_valid_action(output, obs_text)
 
-            return map_to_valid_action(output, obs)
-
-        return smart_fallback(obs)
+        return smart_fallback(obs_text)
 
     except Exception as e:
         print("LLM Error:", e)
-        return smart_fallback(obs)
+        return smart_fallback(obs_text)
 def map_to_valid_action(output, obs):
     # LLM output mapping
     if "refund" in output:
@@ -65,11 +70,11 @@ def map_to_valid_action(output, obs):
     # fallback to rule-based
     return smart_fallback(obs)
 def smart_fallback(obs):
-    obs = obs.lower()
+    obs = extract_text(obs)
 
     if "refund" in obs:
         return "issue_refund"
-    elif "late" in obs or "delay" in obs or "not arrived" in obs:
+    elif "late" in obs or "delay" in obs:
         return "check_order_status"
     else:
         return "respond_to_user"
