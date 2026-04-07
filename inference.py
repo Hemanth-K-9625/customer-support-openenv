@@ -2,12 +2,8 @@ import requests
 import os
 from customer_support_env.server.customer_support_env_environment import CustomerSupportEnvironment
 
-from dotenv import load_dotenv
-load_dotenv()
-
-API_BASE_URL = os.getenv("API_BASE_URL")
-MODEL_NAME = os.getenv("MODEL_NAME")
-HF_TOKEN = os.getenv("HF_TOKEN")
+API_URL = os.getenv('API_BASE_URL')
+MODEL_NAME=os.getenv('MODEL_NAME')
 headers = {
     "Authorization": f"Bearer {os.getenv('HF_TOKEN')}",
     "Content-Type": "application/json"
@@ -42,7 +38,7 @@ Answer:
 
     try:
         response = requests.post(
-            API_BASE_URL,
+            API_URL,
             headers=headers,
             json={
                 "inputs": prompt,
