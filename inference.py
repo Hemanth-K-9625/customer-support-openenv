@@ -2,10 +2,11 @@ import requests
 import os
 from customer_support_env.server.customer_support_env_environment import CustomerSupportEnvironment
 
-API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-large"
+API_URL = "https://router.huggingface.co/hf-inference/v1/models/google/flan-t5-base"
 MODEL_NAME=os.getenv('MODEL_NAME')
 headers = {
-    "Authorization": f"Bearer {os.getenv('HF_TOKEN')}"
+    "Authorization": f"Bearer {os.getenv('HF_TOKEN')}",
+    "Content-Type": "application/json"
 }
 
 VALID_ACTIONS = ["respond_to_user", "check_order_status", "issue_refund"]
