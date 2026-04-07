@@ -27,7 +27,13 @@ def get_action_from_llm(obs, history):
         "inputs": prompt
     })
 
-    return response.json()
+    data = response.json()
+
+    # Extract generated text safely
+    try:
+        return data[0]["generated_text"]
+    except:
+        return "respond_to_user"
 
 def parse_action(raw_output: str) -> str:
     for action in VALID_ACTIONS:
