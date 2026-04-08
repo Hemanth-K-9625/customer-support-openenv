@@ -1,40 +1,44 @@
 spec_version: 1
 name: customer_support_env
 description: >
-  A customer support RL environment where an AI agent learns to resolve 
+  A customer support RL environment where an AI agent resolves
   user issues through actions like refund, apologize, and escalate.
-  The environment provides step-by-step rewards based on agent performance.
 
-type: space
-runtime: fastapi
-app: server.app:app
-port: 8000
+entry_point: customer_support_env.server.customer_support_env_environment:CustomerSupportEnvironment
+
+observation_space:
+  type: object
+  properties:
+    user_query:
+      type: string
+    sentiment:
+      type: string
+    issue_type:
+      type: string
+    order_status:
+      type: string
+    attempts:
+      type: integer
+
+action_space:
+  type: string
+  enum:
+    - apologize
+    - refund
+    - provide_status_update
+    - escalate_to_human
+    - give_discount
+    - track_order
+    - acknowledge_issues
+    - close_case
 
 tasks:
   easy:
     description: "User requests a refund. Agent must issue a refund."
-    initial_action: refund
     max_steps: 10
-
   medium:
     description: "Order is delayed. Agent must apologize and provide status update."
-    initial_action: apologize
     max_steps: 10
-
   hard:
     description: "Angry user with multiple issues. Agent must apologize, investigate, refund and close case."
-    initial_action: apologize
     max_steps: 10
-
-entrypoints:
-  reset: "POST /reset"
-  step: "POST /step"
-  state: "GET /state"
-
-action_space:
-  type: CustomerSupportAction
-
-observation_space:
-  type: CustomerSupportObservation
-
-entry_point: server.customer_support_env_environment:CustomerSupportEnvironment

@@ -1,0 +1,10 @@
+from customer_support_env.server.app import app, main
+
+__all__ = ["app", "main"]
+
+def main():
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+if __name__ == "__main__":
+    main()
