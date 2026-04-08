@@ -27,7 +27,11 @@ VALID_ACTIONS = [
     "close_case",
 ]
 
-def get_action_from_llm(obs, action_history=[]) -> str:
+FALLBACK_ACTION = "provide_status_update"
+
+
+def get_action_from_llm(obs, action_history=None) -> str:
+    action_history = list(action_history or [])
     prompt = f"""You are a customer support agent.
 
 Current situation:
@@ -45,24 +49,58 @@ Choose ONE action from this list:
 Important: Do NOT repeat an action already taken.
 Reply with ONLY the action name. Nothing else."""
 
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[
-            {
-                "role": "system",
-                "content": """You are a customer support AI agent.
+    if not (API_BASE_URL and MODEL_NAME and HF_TOKEN):
+        print("[WARN] Missing LLM configuration, using fallback rule-based action.")
+        return get_rule_based_action(obs, action_history)
+
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are a customer support AI agent.
 You must reply with ONLY one word from this exact list:
 apologize, refund, provide_status_update, escalate_to_human, give_discount, track_order, acknowledge_issues, close_case
 
 No explanation. No sentence. Just one word."""
-            },
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=10,
-    )
+                },
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=10,
+        )
 
-    raw_output = response.choices[0].message.content.strip().lower()
-    return parse_action(raw_output)
+        raw_output = response.choices[0].message.content.strip().lower()
+        return parse_action(raw_output)
+    except Exception as exc:
+        print(f"[ERROR] LLM request failed: {exc}. Falling back to rule-based action.")
+        return get_rule_based_action(obs, action_history)
+
+
+def get_rule_based_action(obs, action_history=None) -> str:
+    action_history = list(action_history or [])
+
+    if obs.order_status == "refunded" and "close_case" not in action_history:
+        return "close_case"
+
+    if obs.sentiment in {"angry", "frustrated"} and "apologize" not in action_history:
+        return "apologize"
+
+    if obs.order_status not in {"refunded", "escalated", "discount_applied", "update_provided"}:
+        if "provide_status_update" not in action_history:
+            return "provide_status_update"
+
+    if obs.issue_type in {"delivery", "tracking"} and "track_order" not in action_history:
+        return "track_order"
+
+    if obs.issue_type in {"billing", "refund"} and "refund" not in action_history:
+        return "refund"
+
+    for action in VALID_ACTIONS:
+        if action not in action_history:
+            return action
+
+    return FALLBACK_ACTION
 
 
 def parse_action(raw_output: str) -> str:
@@ -89,27 +127,31 @@ def parse_action(raw_output: str) -> str:
 
 
 # Main
-env = CustomerSupportEnvironment()
-task = "medium"
+try:
+    env = CustomerSupportEnvironment()
+    task = "medium"
 
-# START LOG
-print(f"[START] task={task} env=CustomerSupportEnvironment model={MODEL_NAME}")
+    # START LOG
+    print(f"[START] task={task} env=CustomerSupportEnvironment model={MODEL_NAME}")
 
-obs = env.reset(task=task)
+    obs = env.reset(task=task)
 
-total_reward = 0.0
-step = 0
-done = False
+    total_reward = 0.0
+    step = 0
+    done = False
 
-# LOOP
-while not done and step < 10:
-    step += 1
-    action = get_action_from_llm(obs, env.action_history)
-    obs, reward, done, info = env.step(action)
-    total_reward += reward
+    # LOOP
+    while not done and step < 10:
+        step += 1
+        action = get_action_from_llm(obs, env.action_history)
+        obs, reward, done, info = env.step(action)
+        total_reward += reward
 
-    # STEP LOG
-    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()}")
+        # STEP LOG
+        print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()}")
 
-# END LOG
-print(f"[END] success={str(done).lower()} steps={step} rewards={total_reward:.2f}")
+    # END LOG
+    print(f"[END] success={str(done).lower()} steps={step} rewards={total_reward:.2f}")
+except Exception as exc:
+    print(f"[FATAL] inference.py failed: {exc}")
+    raise
