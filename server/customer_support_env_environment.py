@@ -19,7 +19,6 @@ from openenv.core.env_server.types import State
 from models import CustomerSupportAction, CustomerSupportObservation
 from task_env.tasks import easy_task, medium_task, hard_task
 
-from ..task_env.tasks import easy_task, medium_task, hard_task
 MAX_STEPS = 10
 class CustomerSupportEnvironment(Environment):
     """
