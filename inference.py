@@ -7,13 +7,13 @@ from server.customer_support_env_environment import (
 
 load_dotenv()
 
-API_BASE_URL = os.getenv("API_BASE_URL")
-MODEL_NAME = os.getenv("MODEL_NAME")
-HF_TOKEN = os.getenv("HF_TOKEN")
+API_BASE_URL = os.environ.get("API_BASE_URL")
+MODEL_NAME = os.environ.get("MODEL_NAME")
+API_KEY = os.environ.get("API_KEY")
 
 client = OpenAI(
     base_url=API_BASE_URL,
-    api_key=HF_TOKEN,
+    api_key=API_KEY,
 )
 
 VALID_ACTIONS = [
@@ -49,7 +49,7 @@ Choose ONE action from this list:
 Important: Do NOT repeat an action already taken.
 Reply with ONLY the action name. Nothing else."""
 
-    if not (API_BASE_URL and MODEL_NAME and HF_TOKEN):
+    if not (API_BASE_URL and MODEL_NAME and API_KEY):
         print("[WARN] Missing LLM configuration, using fallback rule-based action.")
         return get_rule_based_action(obs, action_history)
 
