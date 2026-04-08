@@ -8,11 +8,6 @@ API_BASE_URL = os.environ.get("API_BASE_URL")
 MODEL_NAME = os.environ.get("MODEL_NAME")
 API_KEY = os.environ.get("API_KEY")
 
-client = OpenAI(
-    base_url=API_BASE_URL,
-    api_key=API_KEY if API_KEY else "dummy-key",
-)
-
 VALID_ACTIONS = [
     "apologize",
     "refund",
@@ -29,7 +24,19 @@ FALLBACK_ACTION = "provide_status_update"
 
 def get_action_from_llm(obs, action_history=None) -> str:
     action_history = list(action_history or [])
-    model = MODEL_NAME or "Qwen/Qwen2.5-7B-Instruct"
+    api_base_url = os.environ.get("API_BASE_URL")
+    api_key = os.environ.get("API_KEY")
+    model = os.environ.get("MODEL_NAME") or "Qwen/Qwen2.5-7B-Instruct"
+    
+    print(f"[DEBUG] API_BASE_URL={api_base_url}")
+    print(f"[DEBUG] API_KEY={'set' if api_key else 'NOT SET'}")
+    print(f"[DEBUG] MODEL_NAME={model}")
+
+    client = OpenAI(
+        base_url=api_base_url,
+        api_key=api_key,
+    )
+
     prompt = f"""You are a customer support agent.
 
 Current situation:
