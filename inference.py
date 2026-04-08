@@ -1,11 +1,8 @@
 import os
 from openai import OpenAI
-from dotenv import load_dotenv
 from server.customer_support_env_environment import (
     CustomerSupportEnvironment,
 )
-
-load_dotenv()
 
 API_BASE_URL = os.environ.get("API_BASE_URL")
 MODEL_NAME = os.environ.get("MODEL_NAME")
