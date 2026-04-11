@@ -54,19 +54,13 @@ A customer comes with a problem. The AI agent observes the situation and takes a
 ## Tasks
 
 ### Easy — Refund Request
-- **Scenario:** Customer wants a refund
-- **Correct action:** refund
-- **Reward:** 1.0 for correct, 0.5 for partial, 0.0 for wrong
+- **Reward:** 0.9 for correct, 0.5 for partial, 0.1 for wrong
 
 ### Medium — Delayed Order
-- **Scenario:** Customer's order is late
-- **Correct actions:** apologize + provide_status_update
-- **Reward:** 1.0 for all correct, 0.8 for required only, 0.5 for partial
+- **Reward:** 0.9 for all correct, 0.7 for required only, 0.5 for partial
 
 ### Hard — Multiple Issues
-- **Scenario:** Angry customer with billing and delivery issues
-- **Correct actions:** apologize + acknowledge_issues + offer_refund + close_case
-- **Reward:** 1.0 for full resolution, 0.8 for partial, 0.2 for minimal
+- **Reward:** 0.9 for full resolution, 0.7 for partial, 0.2 for minimal
 
 ---
 
@@ -113,10 +107,22 @@ export $(cat .env | xargs) && python inference.py
 ```
 
 Expected output:
-[START] task=medium env=CustomerSupportEnvironment model=Qwen/Qwen2.5-7B-Instruct
-[STEP] step=1 action=apologize reward=0.25 done=false
-[STEP] step=2 action=provide_status_update reward=0.15 done=false
-[END] success=true steps=2 rewards=0.40
+[START] task=easy env=customer_support_env model=Qwen/Qwen2.5-7B-Instruct
+[STEP] step=1 action=refund reward=0.45 done=false error=null
+[STEP] step=2 action=close_case reward=0.25 done=true error=null
+[END] success=true steps=2 score=0.900 rewards=0.45,0.25
+
+[START] task=medium env=customer_support_env model=Qwen/Qwen2.5-7B-Instruct
+[STEP] step=1 action=apologize reward=0.25 done=false error=null
+[STEP] step=2 action=provide_status_update reward=0.15 done=false error=null
+[END] success=true steps=2 score=0.700 rewards=0.25,0.15
+
+[START] task=hard env=customer_support_env model=Qwen/Qwen2.5-7B-Instruct
+[STEP] step=1 action=apologize reward=0.25 done=false error=null
+[STEP] step=2 action=acknowledge_issues reward=0.25 done=false error=null
+[STEP] step=3 action=refund reward=0.45 done=false error=null
+[STEP] step=4 action=close_case reward=0.25 done=true error=null
+[END] success=true steps=4 score=0.900 rewards=0.25,0.25,0.45,0.25
 
 ---
 

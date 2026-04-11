@@ -9,7 +9,6 @@ except Exception as e:
 from models import CustomerSupportAction, CustomerSupportObservation
 from server.customer_support_env_environment import CustomerSupportEnvironment
 
-
 # ----------- Create backend app -----------
 backend_app = create_app(
     CustomerSupportEnvironment,
@@ -19,13 +18,7 @@ backend_app = create_app(
     max_concurrent_envs=1,
 )
 
-# ----------- Create main FastAPI -----------
-app = FastAPI()
-
-
-app.mount("/", backend_app)
-
-# ----------- Gradio UI -----------
+# ----------- Gradio UI -----------  
 def demo_response(text):
     return f"Customer Support Bot Response: {text}"
 
@@ -36,11 +29,16 @@ demo = gr.Interface(
     title="Customer Support AI Assistant"
 )
 
-# Mount UI at root
-app = gr.mount_gradio_app(app, demo, path="/ui")
+# ----------- Create main FastAPI -----------
+app = FastAPI()
 
-
-# ----------- Health check -----------
+# Health check
 @app.get("/health")
 def health():
     return {"status": "running"}
+
+# Mount Gradio
+app = gr.mount_gradio_app(app, demo, path="/ui")
+
+# Mount backend LAST at /
+app.mount("/", backend_app)

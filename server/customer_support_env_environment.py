@@ -44,13 +44,15 @@ class CustomerSupportEnvironment(Environment):
     SUPPORTS_CONCURRENT_SESSIONS: bool = True
     VALID_ACTIONS = {
     "apologize",
-    "track_order",
-    "provide_status_update",
     "refund",
-    "offer_refund",
-    "give_discount",
+    "provide_status_update",
     "escalate_to_human",
-    "ask_info",
+    "give_discount",
+    "track_order",
+    "acknowledge_issues",
+    "close_case",
+    "offer_refund",
+    "ask_info", 
     }
 
     def __init__(self):
@@ -174,7 +176,7 @@ class CustomerSupportEnvironment(Environment):
         # -----------------------------
         # 7️⃣ FINAL BONUS
         # -----------------------------
-        if base_score == 1.0:
+        if base_score >= 0.9:
             reward += 1.0
 
         # -----------------------------

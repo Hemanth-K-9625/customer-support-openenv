@@ -21,7 +21,10 @@ try:
 except ImportError:
     from models import CustomerSupportAction, CustomerSupportObservation
 
-from ..task_env.tasks import easy_task, medium_task, hard_task
+try:
+    from ..task_env.tasks import easy_task, medium_task, hard_task
+except ImportError:
+    from task_env.tasks import easy_task, medium_task, hard_task
 MAX_STEPS = 10
 class CustomerSupportEnvironment(Environment):
     """
