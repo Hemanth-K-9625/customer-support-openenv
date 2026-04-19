@@ -1,4 +1,3 @@
-# Customer Support AI Environment (OpenEnv)
 ---
 title: Customer Support AI Environment
 emoji: 🤖
@@ -11,7 +10,7 @@ tags:
   - openenv
 ---
 
-
+# Customer Support AI Environment (OpenEnv)
 
 A reinforcement learning environment where an AI agent learns to resolve customer support issues through actions like refund, apologize, and escalate.
 
